@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Projects | nycdubliner</title>
+    <title>Gemini CLI on Android | nycdubliner</title>
     
     <style>
         :root {
@@ -101,32 +101,29 @@
 
 </head>
 <body>
-    <h1>My Projects</h1>
-    <div class="grid">
-
-        <a href="https://nycdubliner.github.io/dbcompass/" class="card">
-            <h2>dbcompass</h2>
-            <p>A simple, mobile-first compass web app to point you to the nearest available Dublin Bikes station in real-time.</p>
-            <div class="meta">Last updated: 2026-03-12</div>
-        </a>
-    
-        <a href="https://nycdubliner.github.io/gemini-playground/" class="card">
-            <h2>gemini-playground</h2>
-            <p>Tiarnán messing with the gemini CLI</p>
-            <div class="meta">Last updated: 2025-08-08</div>
-        </a>
-    
-        <a href="https://nycdubliner.github.io/EE417/" class="card">
-            <h2>EE417</h2>
-            <p>Web Application Development DCU (EE417)</p>
-            <div class="meta">Last updated: 2021-03-28</div>
-        </a>
-    
+    <div style="width: 100%; max-width: 800px;">
+        <a href="index.html" class="back-link">&larr; Back to Projects</a>
     </div>
+    <h1>Gemini CLI on Android</h1>
+    
+    <div class="content-area">
+        <h2>Setup Instructions</h2>
+        <p>To get Gemini CLI running on Android, you'll need <strong>Termux</strong>. Follow these steps:</p>
+        <ol>
+            <li>Install <a href="https://termux.dev/" style="color: var(--accent-color)">Termux</a> (preferably from F-Droid).</li>
+            <li>Update packages: <code>pkg update && pkg upgrade</code></li>
+            <li>Install core dependencies: <code>pkg install nodejs python git gh</code></li>
+            <li>Install Gemini CLI: <code>npm install -g @google/gemini-cli</code></li>
+        </ol>
 
-    <div class="content-area" style="margin-top: 4rem; text-align: center;">
-        <h2>Guides</h2>
-        <p>Check out the <a href="gemini-android.html" style="color: var(--accent-color); font-weight: bold;">Gemini CLI on Android</a> setup guide.</p>
+        <h2>Enhancing the Experience</h2>
+        <p><strong>Android Notifications:</strong> You can send alerts to your phone from Termux by installing the <code>termux-api</code> package (and the corresponding Termux:API app from your app store):</p>
+        <pre style="background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 0.5rem; overflow-x: auto;"><code>pkg install termux-api
+termux-notification -t "Hello" -c "Gemini task complete!"</code></pre>
+
+        <p><strong>Typing Shortcut:</strong> For a more natural typing experience in Termux, you can toggle regular Android keyboard features (like swipe-to-type or autocomplete) by <strong>swiping the special keys bar</strong> above the keyboard.</p>
+
+        <p><strong>Dev Tools:</strong> This environment gives you full access to <code>git</code> and the GitHub CLI (<code>gh</code>), allowing for a professional mobile development workflow.</p>
     </div>
 
     <footer>

@@ -16,14 +16,7 @@ with urllib.request.urlopen(req) as response:
 # Filter repos that have pages enabled or have a homepage set to github.io
 project_repos = [r for r in repos if r.get("has_pages") or (r.get("homepage") and "github.io" in r.get("homepage"))]
 
-# Generate HTML
-html = f"""
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Projects | {USERNAME}</title>
+STYLE = f"""
     <style>
         :root {{
             --bg-color: #0f172a;
@@ -89,32 +82,87 @@ html = f"""
             font-size: 0.8rem;
             opacity: 0.5;
         }}
-        .notes {{
-            margin-top: 4rem;
+        .content-area {{
+            margin-top: 2rem;
             width: 100%;
-            max-width: 1000px;
+            max-width: 800px;
             background: var(--card-bg);
             border-radius: 1rem;
-            padding: 2rem;
+            padding: 2.5rem;
             border: 1px solid rgba(255,255,255,0.05);
         }}
-        .notes h2 {{
+        .content-area h2 {{
             margin-top: 0;
             color: var(--accent-color);
         }}
-        .notes code {{
+        code {{
             background: rgba(0,0,0,0.3);
             padding: 0.2rem 0.4rem;
             border-radius: 0.25rem;
             font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
         }}
-        .notes pre {{
-            background: rgba(0,0,0,0.3);
-            padding: 1rem;
-            border-radius: 0.5rem;
-            overflow-x: auto;
+        .back-link {{
+            color: var(--accent-color);
+            text-decoration: none;
+            display: inline-block;
+            margin-bottom: 2rem;
         }}
+        .back-link:hover {{ text-decoration: underline; }}
     </style>
+"""
+
+# Generate gemini-android.html
+android_html = f"""
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini CLI on Android | {USERNAME}</title>
+    {STYLE}
+</head>
+<body>
+    <div style="width: 100%; max-width: 800px;">
+        <a href="index.html" class="back-link">&larr; Back to Projects</a>
+    </div>
+    <h1>Gemini CLI on Android</h1>
+    
+    <div class="content-area">
+        <h2>Setup Instructions</h2>
+        <p>To get Gemini CLI running on Android, you'll need <strong>Termux</strong>. Follow these steps:</p>
+        <ol>
+            <li>Install <a href="https://termux.dev/" style="color: var(--accent-color)">Termux</a> (preferably from F-Droid).</li>
+            <li>Update packages: <code>pkg update && pkg upgrade</code></li>
+            <li>Install core dependencies: <code>pkg install nodejs python git gh</code></li>
+            <li>Install Gemini CLI: <code>npm install -g @google/gemini-cli</code></li>
+        </ol>
+
+        <h2>Enhancing the Experience</h2>
+        <p><strong>Android Notifications:</strong> You can send alerts to your phone from Termux by installing the <code>termux-api</code> package (and the corresponding Termux:API app from your app store):</p>
+        <pre style="background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 0.5rem; overflow-x: auto;"><code>pkg install termux-api
+termux-notification -t "Hello" -c "Gemini task complete!"</code></pre>
+
+        <p><strong>Typing Shortcut:</strong> For a more natural typing experience in Termux, you can toggle regular Android keyboard features (like swipe-to-type or autocomplete) by <strong>swiping the special keys bar</strong> above the keyboard.</p>
+
+        <p><strong>Dev Tools:</strong> This environment gives you full access to <code>git</code> and the GitHub CLI (<code>gh</code>), allowing for a professional mobile development workflow.</p>
+    </div>
+
+    <footer>
+        Last generated: {datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')}
+    </footer>
+</body>
+</html>
+"""
+
+# Generate index.html
+index_html = f"""
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projects | {USERNAME}</title>
+    {STYLE}
 </head>
 <body>
     <h1>My Projects</h1>
@@ -130,7 +178,7 @@ for repo in project_repos:
     url = repo["homepage"] if repo["homepage"] else f"https://{USERNAME}.github.io/{name}/"
     date_str = repo["pushed_at"][:10]
     
-    html += f"""
+    index_html += f"""
         <a href="{url}" class="card">
             <h2>{name}</h2>
             <p>{desc}</p>
@@ -138,19 +186,12 @@ for repo in project_repos:
         </a>
     """
 
-html += f"""
+index_html += f"""
     </div>
 
-    <div class="notes">
-        <h2>Android Setup</h2>
-        <p>To get Gemini CLI running on Android, you'll need <strong>Termux</strong>. Follow these steps:</p>
-        <ol>
-            <li>Install <a href="https://termux.dev/" style="color: var(--accent-color)">Termux</a> (preferably from F-Droid).</li>
-            <li>Update packages: <code>pkg update && pkg upgrade</code></li>
-            <li>Install dependencies: <code>pkg install nodejs python git gh</code></li>
-            <li>Install Gemini CLI: <code>npm install -g @google/gemini-cli</code></li>
-        </ol>
-        <p><strong>Note:</strong> With this setup, you have full access to <code>git</code> and the GitHub CLI (<code>gh</code>) directly within your Android environment, enabling powerful mobile development workflows.</p>
+    <div class="content-area" style="margin-top: 4rem; text-align: center;">
+        <h2>Guides</h2>
+        <p>Check out the <a href="gemini-android.html" style="color: var(--accent-color); font-weight: bold;">Gemini CLI on Android</a> setup guide.</p>
     </div>
 
     <footer>
@@ -161,4 +202,7 @@ html += f"""
 """
 
 with open("index.html", "w") as f:
-    f.write(html)
+    f.write(index_html)
+
+with open("gemini-android.html", "w") as f:
+    f.write(android_html)

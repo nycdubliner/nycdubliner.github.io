@@ -70,6 +70,31 @@
             font-size: 0.8rem;
             opacity: 0.5;
         }
+        .notes {
+            margin-top: 4rem;
+            width: 100%;
+            max-width: 1000px;
+            background: var(--card-bg);
+            border-radius: 1rem;
+            padding: 2rem;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .notes h2 {
+            margin-top: 0;
+            color: var(--accent-color);
+        }
+        .notes code {
+            background: rgba(0,0,0,0.3);
+            padding: 0.2rem 0.4rem;
+            border-radius: 0.25rem;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+        .notes pre {
+            background: rgba(0,0,0,0.3);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+        }
     </style>
 </head>
 <body>
@@ -95,8 +120,21 @@
         </a>
     
     </div>
+
+    <div class="notes">
+        <h2>Android Setup</h2>
+        <p>To get Gemini CLI running on Android, you'll need <strong>Termux</strong>. Follow these steps:</p>
+        <ol>
+            <li>Install <a href="https://termux.dev/" style="color: var(--accent-color)">Termux</a> (preferably from F-Droid).</li>
+            <li>Update packages: <code>pkg update && pkg upgrade</code></li>
+            <li>Install dependencies: <code>pkg install nodejs python git gh</code></li>
+            <li>Install Gemini CLI: <code>npm install -g @google/gemini-cli</code></li>
+        </ol>
+        <p><strong>Note:</strong> With this setup, you have full access to <code>git</code> and the GitHub CLI (<code>gh</code>) directly within your Android environment, enabling powerful mobile development workflows.</p>
+    </div>
+
     <footer>
-        Last generated: 2026-03-27 01:44 UTC
+        Last generated: 2026-03-27 16:15 UTC
     </footer>
 </body>
 </html>

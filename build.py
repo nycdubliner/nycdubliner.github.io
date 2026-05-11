@@ -154,6 +154,66 @@ termux-notification -t "Hello" -c "Gemini task complete!"</code></pre>
 </html>
 """
 
+# Generate agentic-engineering.html
+agentic_html = f"""
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agentic Engineering Resources | {USERNAME}</title>
+    {STYLE}
+</head>
+<body>
+    <div style="width: 100%; max-width: 800px;">
+        <a href="index.html" class="back-link">&larr; Back to Projects</a>
+    </div>
+    <h1>Agentic Engineering Resources</h1>
+    
+    <div class="content-area">
+        <h2>High-Quality Blogposts</h2>
+        <p>A collection of essential reading for modern AI-assisted engineering.</p>
+        
+        <ul style="list-style-type: none; padding: 0;">
+            <li style="margin-bottom: 2rem;">
+                <strong>Addy Osmani</strong>: 
+                <a href="https://addyosmani.com/blog/agentic-engineering/" style="color: var(--accent-color)">"Agentic Engineering"</a> 
+                <span style="opacity: 0.7; font-size: 0.9rem;">(Feb 4, 2026)</span>
+                <p style="margin-top: 0.5rem; opacity: 0.8;">Explores the shift from "vibe coding" to disciplined agentic workflows.</p>
+            </li>
+            <li style="margin-bottom: 2rem;">
+                <strong>Ramón Medrano Llamas</strong>: 
+                <a href="https://research.google/pubs/industrial-agentic-engineering/" style="color: var(--accent-color)">"Industrial Agentic Engineering"</a> 
+                <span style="opacity: 0.7; font-size: 0.9rem;">(2026)</span>
+                <p style="margin-top: 0.5rem; opacity: 0.8;">SRE-focused perspective on "The Harness" and the mindset of impermanence.</p>
+            </li>
+            <li style="margin-bottom: 2rem;">
+                <strong>Martin Gratzer</strong> (via <strong>Taylor Mullen</strong>): 
+                <a href="https://mgratzer.com/posts/forging-a-workflow/" style="color: var(--accent-color)">"Forging a Workflow: Agentic Engineering in Practice"</a>
+                <p style="margin-top: 0.5rem; opacity: 0.8;">Insights on building repeatable, high-leverage AI engineering loops.</p>
+            </li>
+            <li style="margin-bottom: 2rem;">
+                <strong>Dion Almaer</strong>: 
+                <a href="https://almaer.com/2026/05/07/agentic-engineering/" style="color: var(--accent-color)">"Agentic Engineering"</a> 
+                <span style="opacity: 0.7; font-size: 0.9rem;">(May 7, 2026)</span>
+                <p style="margin-top: 0.5rem; opacity: 0.8;">Mentions an unnamed internal coding harness and the transition to CLI-first orchestration.</p>
+            </li>
+            <li style="margin-bottom: 2rem;">
+                <strong>Sam Schillace</strong>: 
+                <a href="https://samschillace.substack.com/p/what-is-a-harness-and-why-do-i-care" style="color: var(--accent-color)">"What is a harness and why do I care?"</a> 
+                <span style="opacity: 0.7; font-size: 0.9rem;">(May 3, 2026)</span>
+                <p style="margin-top: 0.5rem; opacity: 0.8;">Foundational thinking on the orchestration layer as the operating system for agents.</p>
+            </li>
+        </ul>
+    </div>
+
+    <footer>
+        Last generated: {datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')}
+    </footer>
+</body>
+</html>
+"""
+
 # Generate index.html
 index_html = f"""
 <!DOCTYPE html>
@@ -191,7 +251,10 @@ index_html += f"""
 
     <div class="content-area" style="margin-top: 4rem; text-align: center;">
         <h2>Guides</h2>
-        <p>Check out the <a href="gemini-android.html" style="color: var(--accent-color); font-weight: bold;">Gemini CLI on Android</a> setup guide.</p>
+        <div style="display: flex; gap: 2rem; justify-content: center;">
+            <p><a href="gemini-android.html" style="color: var(--accent-color); font-weight: bold;">Gemini CLI on Android</a></p>
+            <p><a href="agentic-engineering.html" style="color: var(--accent-color); font-weight: bold;">Agentic Engineering Resources</a></p>
+        </div>
     </div>
 
     <footer>
@@ -206,3 +269,6 @@ with open("index.html", "w") as f:
 
 with open("gemini-android.html", "w") as f:
     f.write(android_html)
+
+with open("agentic-engineering.html", "w") as f:
+    f.write(agentic_html)

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tronbyt Dublin Transit Setup | nycdubliner</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --text-color: #f8fafc;
+            --card-bg: #1e293b;
+            --accent-color: #38bdf8;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .content-area {
+            width: 100%;
+            max-width: 860px;
+            background: var(--card-bg);
+            border-radius: 1rem;
+            padding: 2.5rem;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        h1, h2 {
+            color: var(--accent-color);
+            margin-top: 0;
+        }
+        h2 {
+            margin-top: 2rem;
+        }
+        a {
+            color: var(--accent-color);
+        }
+        code, pre {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+        code {
+            background: rgba(0,0,0,0.3);
+            padding: 0.2rem 0.4rem;
+            border-radius: 0.25rem;
+        }
+        pre {
+            background: rgba(0,0,0,0.3);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+        }
+        .back-link {
+            color: var(--accent-color);
+            text-decoration: none;
+            display: inline-block;
+            margin-bottom: 2rem;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        .meta {
+            opacity: 0.75;
+        }
+    </style>
+</head>
+<body>
+    <div style="width: 100%; max-width: 860px;">
+        <a href="index.html" class="back-link">&larr; Back to Projects</a>
+    </div>
+
+    <div class="content-area">
+        <h1>Tronbyt Dublin Transit Setup</h1>
+        <p class="meta">A reproducible setup guide for converting a stock Tidbyt Gen1 into a locally managed Tronbyt that cycles between Luas arrivals for Blackhorse and Dublin Bus arrivals for Oblates stop 1987.</p>
+
+        <p>The full source and documentation live in <a href="https://github.com/nycdubliner/tronbyt-dublin-transit-setup">nycdubliner/tronbyt-dublin-transit-setup</a>.</p>
+
+        <h2>Final Topology</h2>
+        <ul>
+            <li>Tronbyt server on <code>http://&lt;host&gt;:8000</code></li>
+            <li><code>nextbus</code> on <code>http://&lt;host&gt;:8080</code></li>
+            <li>Flashed Tidbyt Gen1 polling Tronbyt over Wi‑Fi</li>
+            <li>Two custom Pixlet apps: <code>blackhorse_luas</code> and <code>oblates_buses</code></li>
+        </ul>
+
+        <h2>What The Repo Contains</h2>
+        <ul>
+            <li>Exact app source for both display applets</li>
+            <li>Exported Tronbyt manager settings for the two live apps</li>
+            <li>A sanitized Windows deployment template for <code>nextbus</code></li>
+            <li>Exact operational notes for the running display</li>
+        </ul>
+
+        <h2>Deployment Outline</h2>
+        <ol>
+            <li>Run Tronbyt server using the official Docker deployment.</li>
+            <li>Create an admin user and a device called <code>display</code>.</li>
+            <li>Generate firmware for Tidbyt Gen1 from Tronbyt Manager.</li>
+            <li>Flash the stock Tidbyt using the ESP web flasher.</li>
+            <li>Deploy <code>nextbus</code> and expose it on port <code>8080</code>.</li>
+            <li>Create two custom apps in Tronbyt Manager from the repo’s Pixlet files.</li>
+            <li>Set brightness to <code>2</code>, app cycle time to <code>15</code>, and order the apps Luas first, buses second.</li>
+        </ol>
+
+        <h2>Observed Live Values</h2>
+        <ul>
+            <li>Tronbyt server version: <code>2.2.0</code></li>
+            <li>Device firmware version: <code>1.6.1</code></li>
+            <li>Luas stop code: <code>BLA</code></li>
+            <li>Bus stop query: <code>1987</code></li>
+            <li>Rendered bus API base URL in the live setup: <code>http://192.168.0.153:8080/arrivals</code></li>
+        </ul>
+
+        <h2>Notes</h2>
+        <p>This setup deliberately uses the public Luas feed directly and a separate local <code>nextbus</code> service for bus arrivals. The full guide avoids publishing secrets and assumes the reader can adapt LAN addressing, credentials, and Docker host placement as needed.</p>
+    </div>
+</body>
+</html>

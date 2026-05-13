@@ -100,11 +100,15 @@
             <li>Run Tronbyt server using the official Docker deployment.</li>
             <li>Create an admin user and a device called <code>display</code>.</li>
             <li>Generate firmware for Tidbyt Gen1 from Tronbyt Manager.</li>
-            <li>Flash the stock Tidbyt using the ESP web flasher.</li>
+            <li>Flash the stock Tidbyt using the ESP web flasher. A USB-A to USB-C cable has been more reliable than USB-C to USB-C.</li>
             <li>Deploy <code>nextbus</code> and expose it on port <code>8080</code>.</li>
             <li>Create two custom apps in Tronbyt Manager from the repo’s Pixlet files.</li>
             <li>Set brightness to <code>2</code>, app cycle time to <code>15</code>, and order the apps Luas first, buses second.</li>
         </ol>
+
+        <h2>Changing Stops</h2>
+        <p>To move the Luas app to a different stop, edit <code>STOP_CODE</code> and <code>STOP_NAME</code> in <code>apps/blackhorse_luas/blackhorse_luas.star</code>, then validate the stop against the Luas XML endpoint before pasting the updated source into Tronbyt Manager.</p>
+        <p>To move the bus app, edit <code>BUS_STOP_QUERY</code> and <code>BUS_STOP_NAME</code> in <code>apps/oblates_buses/oblates_buses.star</code>. If your backend host changes, also update <code>API_BASE_URL</code>. Validate with <code>curl http://&lt;host&gt;:8080/arrivals?stop=&lt;code&gt;</code> before saving the updated app in Tronbyt Manager.</p>
 
         <h2>Observed Live Values</h2>
         <ul>

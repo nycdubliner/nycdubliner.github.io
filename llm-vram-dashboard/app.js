@@ -197,6 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
             variants: [
                 { name: "2B", params: 2, isMoe: false },
                 { name: "9B", params: 9, isMoe: false },
+                { name: "26B MoE", params: 3.8, isMoe: true, tExp: 7, aExp: 1 }, // 26B total, ~3.8B active. Rough approximation for visualizer
                 { name: "27B", params: 27, isMoe: false }
             ]
         },

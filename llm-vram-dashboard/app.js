@@ -193,6 +193,14 @@ document.addEventListener('DOMContentLoaded', () => {
             ]
         },
         {
+            family: "Gemma 4",
+            variants: [
+                { name: "2B", params: 2, isMoe: false },
+                { name: "9B", params: 9, isMoe: false },
+                { name: "27B", params: 27, isMoe: false }
+            ]
+        },
+        {
             family: "Mixtral",
             variants: [
                 { name: "8x7B", params: 7, isMoe: true, tExp: 8, aExp: 2 },

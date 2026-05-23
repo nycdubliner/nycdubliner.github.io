@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM VRAM Visualizer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <h1>LLM VRAM Visualizer</h1>
+            <p>Calculate model memory footprint and offloading splits.</p>
+        </header>
+
+        <main class="dashboard">
+            <!-- Left: Controls -->
+            <section class="panel controls-panel">
+                <h2>Configuration</h2>
+
+                <div class="control-group">
+                    <label for="vram-preset">Target VRAM Capacity</label>
+                    <select id="vram-preset">
+                        <option value="8">8 GB</option>
+                        <option value="12">12 GB</option>
+                        <option value="16">16 GB</option>
+                        <option value="24" selected>24 GB</option>
+                        <option value="32">32 GB</option>
+                        <option value="48">48 GB</option>
+                        <option value="80">80 GB</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <div class="label-row">
+                        <label for="params-slider">Base Parameters (Billion)</label>
+                        <span id="params-value" class="value-display">70B</span>
+                    </div>
+                    <input type="range" id="params-slider" min="1" max="200" step="1" value="70">
+                </div>
+
+                <div class="control-group">
+                    <div class="label-row">
+                        <label for="quant-slider">Quantization (Bits per parameter)</label>
+                        <span id="quant-value" class="value-display">4.5 bits (Q4_K_M)</span>
+                    </div>
+                    <input type="range" id="quant-slider" min="2" max="16" step="0.5" value="4.5">
+                    <div class="quant-marks">
+                        <span style="left: 0%">2b</span>
+                        <span style="left: 14.28%">4b</span>
+                        <span style="left: 42.85%">8b</span>
+                        <span style="left: 100%">16b</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <div class="label-row">
+                        <label for="context-slider">Context Window (Tokens)</label>
+                        <span id="context-value" class="value-display">8192</span>
+                    </div>
+                    <input type="range" id="context-slider" min="2048" max="131072" step="2048" value="8192">
+                </div>
+
+                <hr class="divider">
+
+                <div class="moe-toggle-container">
+                    <label class="switch">
+                        <input type="checkbox" id="moe-toggle">
+                        <span class="slider round"></span>
+                    </label>
+                    <h3>Enable Mixture of Experts (MoE)</h3>
+                </div>
+
+                <div id="moe-controls" class="hidden">
+                    <div class="control-group">
+                        <div class="label-row">
+                            <label for="experts-slider">Total Experts</label>
+                            <span id="experts-value" class="value-display">8</span>
+                        </div>
+                        <input type="range" id="experts-slider" min="2" max="16" step="1" value="8">
+                    </div>
+                    <div class="control-group">
+                        <div class="label-row">
+                            <label for="active-experts-slider">Active Experts</label>
+                            <span id="active-experts-value" class="value-display">2</span>
+                        </div>
+                        <input type="range" id="active-experts-slider" min="1" max="16" step="1" value="2">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right: Visualizer -->
+            <section class="panel visualizer-panel">
+                <h2>Memory Allocation</h2>
+                
+                <div class="metrics">
+                    <div class="metric">
+                        <span class="metric-label">Total Model Size</span>
+                        <span class="metric-value" id="total-size-metric">0 GB</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Active Compute Size</span>
+                        <span class="metric-value" id="active-size-metric">0 GB</span>
+                    </div>
+                </div>
+
+                <!-- VRAM Box -->
+                <div class="ram-container">
+                    <div class="ram-header">
+                        <h3>GPU VRAM</h3>
+                        <span id="vram-capacity-label">24 GB</span>
+                    </div>
+                    <div class="ram-box" id="vram-box">
+                        <div class="ram-fill" id="vram-fill"></div>
+                        <span class="ram-text" id="vram-text">0% Used</span>
+                    </div>
+                </div>
+
+                <!-- System RAM Box (Spillage) -->
+                <div class="ram-container system-ram" id="system-ram-container">
+                    <div class="ram-header">
+                        <h3>System RAM (Offloaded)</h3>
+                        <span id="sysram-spill-label">0 GB needed</span>
+                    </div>
+                    <div class="ram-box system-box" id="sysram-box">
+                        <div class="ram-fill sys-fill" id="sysram-fill"></div>
+                        <span class="ram-text" id="sysram-text">No spillage</span>
+                    </div>
+                </div>
+
+                <div class="insight-box" id="insight-box">
+                    Fits completely in VRAM! Maximize layer offloading for fastest inference.
+                </div>
+            </section>
+        </main>
+
+        <section class="presets-panel">
+            <h2>Popular Models</h2>
+            <div class="presets-grid" id="presets-grid">
+                <!-- Injected via JS -->
+            </div>
+        </section>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>

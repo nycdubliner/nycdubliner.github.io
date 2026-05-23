@@ -99,11 +99,12 @@ header p {
 }
 
 .value-display {
-    color: var(--accent);
     font-weight: 600;
+    color: var(--accent);
     background: rgba(59, 130, 246, 0.1);
-    padding: 2px 8px;
+    padding: 0.2rem 0.6rem;
     border-radius: 4px;
+    font-size: 0.9rem;
 }
 
 input[type="range"] {
@@ -112,10 +113,10 @@ input[type="range"] {
     cursor: pointer;
 }
 
-select {
+select, .glass-select {
     width: 100%;
     padding: 0.75rem;
-    background: rgba(0, 0, 0, 0.2);
+    background: rgba(0, 0, 0, 0.3);
     border: 1px solid var(--panel-border);
     color: white;
     border-radius: 8px;
@@ -123,11 +124,22 @@ select {
     font-family: inherit;
     outline: none;
     cursor: pointer;
+    transition: all 0.2s;
+    appearance: none;
+    -webkit-appearance: none;
+    margin-top: 0.5rem;
 }
 
-select option {
-    background: var(--bg-color);
+select:focus, .glass-select:focus {
+    border-color: var(--accent);
 }
+
+select option, .glass-select option, .glass-select optgroup {
+    background: var(--bg-dark);
+    color: var(--text-primary);
+}
+
+
 
 .quant-marks {
     position: relative;

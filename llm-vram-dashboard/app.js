@@ -1,6 +1,13 @@
 document.addEventListener('DOMContentLoaded', () => {
     // DOM Elements
+    const vramSlider = document.getElementById('vram-slider');
     const vramPreset = document.getElementById('vram-preset');
+    const vramVal = document.getElementById('vram-val');
+    
+    const bwSlider = document.getElementById('bw-slider');
+    const bwVal = document.getElementById('bw-val');
+    const hwPresetSelect = document.getElementById('hw-preset');
+
     const paramsSlider = document.getElementById('params-slider');
     const paramsValue = document.getElementById('params-value');
     const quantSlider = document.getElementById('quant-slider');
@@ -25,6 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const sysramSpillLabel = document.getElementById('sysram-spill-label');
     const sysramFill = document.getElementById('sysram-fill');
     const sysramText = document.getElementById('sysram-text');
+    const sysramBox = document.getElementById('sysram-box');
     const insightBox = document.getElementById('insight-box');
 
     const GB_DIVISOR = 8; // bits to Bytes
@@ -42,13 +50,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateVisualizer() {
-        const capacityVRAM = parseFloat(vramPreset.value);
         const params = parseFloat(paramsSlider.value);
         const quantBits = parseFloat(quantSlider.value);
         const context = parseInt(contextSlider.value);
         const isMoE = moeToggle.checked;
         const totalExperts = parseInt(expertsSlider.value);
         const activeExperts = parseInt(activeExpertsSlider.value);
+        
+        const capacityVRAM = parseFloat(vramSlider.value);
+        const memBw = parseFloat(bwSlider.value);
 
         // UI Updates
         paramsValue.textContent = `${params}B`;
@@ -87,28 +97,16 @@ document.addEventListener('DOMContentLoaded', () => {
         activeSizeMetric.textContent = `${activeRequiredGB.toFixed(1)} GB`;
 
         let vramUsed = totalRequiredGB;
-        let sysramUsed = 0;
+        let spillSize = 0;
 
         if (totalRequiredGB > capacityVRAM) {
             vramUsed = capacityVRAM;
-            sysramUsed = totalRequiredGB - capacityVRAM;
+            spillSize = totalRequiredGB - capacityVRAM;
         }
 
         const vramPercent = (vramUsed / capacityVRAM) * 100;
         vramFill.style.width = `${Math.min(vramPercent, 100)}%`;
         vramText.textContent = `${vramUsed.toFixed(1)} GB (${Math.round(vramPercent)}%)`;
-
-        if (sysramUsed > 0) {
-            sysramSpillLabel.textContent = `${sysramUsed.toFixed(1)} GB spilled`;
-            const sysramCapacity = 64; // arbitrary max scale for visual
-            const sysPercent = (sysramUsed / sysramCapacity) * 100;
-            sysramFill.style.width = `${Math.min(sysPercent, 100)}%`;
-            sysramText.textContent = `${sysramUsed.toFixed(1)} GB in System RAM`;
-        } else {
-            sysramSpillLabel.textContent = `0 GB needed`;
-            sysramFill.style.width = `0%`;
-            sysramText.textContent = `No spillage`;
-        }
 
         // Colors
         if (vramPercent >= 100 && activeRequiredGB > capacityVRAM) {
@@ -122,33 +120,59 @@ document.addEventListener('DOMContentLoaded', () => {
             vramFill.style.boxShadow = '0 0 15px var(--vram-safe)';
         }
 
-        // Insights
-        if (sysramUsed === 0) {
-            insightBox.style.backgroundColor = 'rgba(16, 185, 129, 0.1)';
-            insightBox.style.borderColor = 'rgba(16, 185, 129, 0.3)';
-            insightBox.style.color = '#10b981';
-            insightBox.innerHTML = `<strong>Perfect Fit!</strong> The entire model (${totalRequiredGB.toFixed(1)}GB) and KV cache fit entirely in your ${capacityVRAM}GB VRAM. Maximum inference speed.`;
-        } else if (activeRequiredGB <= capacityVRAM) {
-            insightBox.style.backgroundColor = 'rgba(245, 158, 11, 0.1)';
-            insightBox.style.borderColor = 'rgba(245, 158, 11, 0.3)';
-            insightBox.style.color = '#f59e0b';
-            insightBox.innerHTML = `<strong>Partial Offload.</strong> Your active compute footprint (${activeRequiredGB.toFixed(1)}GB) fits in VRAM, but the rest of the model spills ${sysramUsed.toFixed(1)}GB into System RAM. Expect slower generation due to PCIe bus transfers during expert fetching.`;
-        } else {
+        // Insights / Spillage Logic
+        let sysSpillFill = 0;
+        let tpsStr = '';
+
+        if (spillSize > 0) {
+            sysSpillFill = Math.min(100, (spillSize / 64) * 100); 
+            sysramFill.style.width = sysSpillFill + '%';
+            sysramText.textContent = `${spillSize.toFixed(1)} GB Spilled`;
+            sysramSpillLabel.textContent = `${spillSize.toFixed(1)} GB needed`;
+            sysramBox.style.borderColor = 'var(--vram-danger)';
+            
+            const effectiveBw = Math.min(memBw, 100); 
+            const tps = effectiveBw / activeRequiredGB;
+            tpsStr = `<br><span style="color:var(--vram-danger); margin-top: 0.5rem; display: block;">⚠️ High spillage penalty! Theoretical Max: <b>~${tps.toFixed(1)} t/s</b></span>`;
+            
+            insightBox.innerHTML = `Model requires <b>${spillSize.toFixed(1)} GB</b> of System RAM offloading. Performance will be severely degraded due to PCIe/System RAM bottlenecks.${tpsStr}`;
             insightBox.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
             insightBox.style.borderColor = 'rgba(239, 68, 68, 0.3)';
             insightBox.style.color = '#ef4444';
-            insightBox.innerHTML = `<strong>Heavy Spillage.</strong> Even the active compute parameters exceed your VRAM. You will experience massive slowdowns (1-2 tokens/sec) as the GPU constantly swaps active layers with System RAM.`;
+        } else {
+            sysramFill.style.width = '0%';
+            sysramText.textContent = 'No spillage';
+            sysramSpillLabel.textContent = '0 GB needed';
+            sysramBox.style.borderColor = 'var(--panel-border)';
+            
+            const tps = memBw / activeRequiredGB;
+            tpsStr = `<br><span style="margin-top: 0.5rem; display: block;">Theoretical Max Speed: <b>~${tps.toFixed(1)} tokens/second</b></span>`;
+
+            insightBox.innerHTML = `Fits completely in VRAM! Maximize layer offloading for fastest inference.${tpsStr}`;
+            insightBox.style.backgroundColor = 'rgba(16, 185, 129, 0.1)';
+            insightBox.style.borderColor = 'rgba(16, 185, 129, 0.3)';
+            insightBox.style.color = '#10b981';
         }
     }
 
-    const inputs = [
-        vramPreset, paramsSlider, quantSlider, contextSlider,
-        expertsSlider, activeExpertsSlider
-    ];
-
-    inputs.forEach(input => {
-        input.addEventListener('input', updateVisualizer);
+    // Sliders
+    vramSlider.addEventListener('input', (e) => {
+        vramVal.textContent = e.target.value + ' GB';
+        vramPreset.value = 'custom';
+        updateVisualizer();
     });
+
+    bwSlider.addEventListener('input', (e) => {
+        bwVal.textContent = e.target.value + ' GB/s';
+        hwPresetSelect.value = 'custom';
+        updateVisualizer();
+    });
+
+    paramsSlider.addEventListener('input', updateVisualizer);
+    quantSlider.addEventListener('input', updateVisualizer);
+    contextSlider.addEventListener('input', updateVisualizer);
+    expertsSlider.addEventListener('input', updateVisualizer);
+    activeExpertsSlider.addEventListener('input', updateVisualizer);
 
     moeToggle.addEventListener('change', (e) => {
         if (e.target.checked) {
@@ -157,6 +181,105 @@ document.addEventListener('DOMContentLoaded', () => {
             moeControls.classList.add('hidden');
         }
         updateVisualizer();
+    });
+
+    // Hardware Presets Data
+    const hardwarePresets = [
+        {
+            group: "Nvidia 50-Series",
+            options: [
+                { name: "1x RTX 5090", bw: 1792 },
+                { name: "2x RTX 5090", bw: 3584 },
+                { name: "1x RTX 5080", bw: 960 },
+                { name: "2x RTX 5080", bw: 1920 }
+            ]
+        },
+        {
+            group: "Nvidia 40-Series",
+            options: [
+                { name: "1x RTX 4090", bw: 1008 },
+                { name: "2x RTX 4090", bw: 2016 },
+                { name: "1x RTX 4080", bw: 717 },
+                { name: "2x RTX 4080", bw: 1434 },
+                { name: "1x RTX 4070 Ti", bw: 504 },
+                { name: "2x RTX 4070 Ti", bw: 1008 },
+                { name: "1x RTX 4060 Ti", bw: 288 },
+                { name: "2x RTX 4060 Ti", bw: 576 }
+            ]
+        },
+        {
+            group: "Nvidia 30-Series",
+            options: [
+                { name: "1x RTX 3090", bw: 936 },
+                { name: "2x RTX 3090", bw: 1872 },
+                { name: "1x RTX 3080", bw: 760 },
+                { name: "2x RTX 3080", bw: 1520 },
+                { name: "1x RTX 3070", bw: 448 },
+                { name: "2x RTX 3070", bw: 896 },
+                { name: "1x RTX 3060", bw: 360 },
+                { name: "2x RTX 3060", bw: 720 }
+            ]
+        },
+        {
+            group: "AMD RX 7000-Series",
+            options: [
+                { name: "1x RX 7900 XTX", bw: 960 },
+                { name: "2x RX 7900 XTX", bw: 1920 },
+                { name: "1x RX 7900 XT", bw: 800 },
+                { name: "2x RX 7900 XT", bw: 1600 },
+                { name: "1x RX 7800 XT", bw: 624 },
+                { name: "2x RX 7800 XT", bw: 1248 },
+                { name: "1x RX 7600", bw: 288 },
+                { name: "2x RX 7600", bw: 576 }
+            ]
+        },
+        {
+            group: "Intel Arc",
+            options: [
+                { name: "1x A770", bw: 512 },
+                { name: "2x A770", bw: 1024 }
+            ]
+        },
+        {
+            group: "Mac Silicon (Unified)",
+            options: [
+                { name: "M2/M3 Ultra", bw: 800 },
+                { name: "M2/M3 Max", bw: 400 },
+                { name: "M2/M3 Pro", bw: 200 }
+            ]
+        },
+        {
+            group: "System RAM",
+            options: [
+                { name: "DDR5-6000 (Dual Channel)", bw: 96 },
+                { name: "DDR4-3200 (Dual Channel)", bw: 51 }
+            ]
+        }
+    ];
+
+    hardwarePresets.forEach(group => {
+        const optgroup = document.createElement('optgroup');
+        optgroup.label = group.group;
+        group.options.forEach(opt => {
+            const option = document.createElement('option');
+            option.value = opt.bw;
+            option.textContent = `${opt.name} (~${opt.bw} GB/s)`;
+            optgroup.appendChild(option);
+        });
+        hwPresetSelect.appendChild(optgroup);
+    });
+
+    const initialBw = hwPresetSelect.querySelector('option[value="1008"]');
+    if (initialBw) {
+        initialBw.selected = true;
+    }
+
+    hwPresetSelect.addEventListener('change', (e) => {
+        if (e.target.value !== 'custom') {
+            bwSlider.value = e.target.value;
+            bwVal.textContent = e.target.value + ' GB/s';
+            updateVisualizer();
+        }
     });
 
     const modelFamilies = [
@@ -197,7 +320,7 @@ document.addEventListener('DOMContentLoaded', () => {
             variants: [
                 { name: "2B", params: 2, isMoe: false },
                 { name: "9B", params: 9, isMoe: false },
-                { name: "26B MoE", params: 3.8, isMoe: true, tExp: 7, aExp: 1 }, // 26B total, ~3.8B active. Rough approximation for visualizer
+                { name: "26B MoE", params: 3.8, isMoe: true, tExp: 7, aExp: 1 }, 
                 { name: "27B", params: 27, isMoe: false }
             ]
         },
@@ -224,6 +347,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ]
         }
     ];
+
 
     const presetsGrid = document.getElementById('presets-grid');
     presetsGrid.innerHTML = ''; 
